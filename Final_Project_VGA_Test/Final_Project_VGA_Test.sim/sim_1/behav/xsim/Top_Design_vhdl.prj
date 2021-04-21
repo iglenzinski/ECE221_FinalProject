@@ -1,0 +1,8 @@
+# compile vhdl design source files
+vhdl xil_defaultlib  \
+"../../../../Final_Project_VGA_Test.srcs/sources_1/new/Clock_Divider.vhd" \
+"../../../../Final_Project_VGA_Test.srcs/sources_1/new/VGA_Controller.vhd" \
+"../../../../Final_Project_VGA_Test.srcs/sources_1/new/Top_Design.vhd" \
+
+# Do not sort compile order
+nosort

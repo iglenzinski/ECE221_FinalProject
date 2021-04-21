@@ -38,7 +38,27 @@ end Clock_Divider;
 
 architecture Behavioral of Clock_Divider is
 
+signal Clock_Counter : integer range 0 to 1000 := 0;
+
+constant Count_Target : integer := 4;
+
 begin
 
+process(I_Clk)
+begin
+if rising_edge(I_Clk) then
+    if (Clock_Counter = (Count_Target - 1)) then
+        Clock_Counter <= 0;
+    else
+        Clock_Counter <= Clock_Counter + 1;    
+    end if;
+    
+    if (Clock_Counter < (Count_Target / 2)) then
+        O_Clk <= '1';    
+    else
+        O_Clk <= '0';    
+    end if;
+end if;
+end process;
 
 end Behavioral;

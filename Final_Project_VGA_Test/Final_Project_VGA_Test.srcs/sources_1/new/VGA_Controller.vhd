@@ -45,7 +45,132 @@ end VGA_Controller;
 
 architecture Behavioral of VGA_Controller is
 
+-- *************  640 x 480  ************* --
+Constant H_FrontPorch : integer := 16;
+Constant H_ViewWindow : integer := 640;
+Constant H_SyncCount : integer := 96;
+Constant H_BackPorch : integer := 48;
+Constant H_TotalCount : integer := 800;
+
+Constant V_FrontPorch : integer := 10;
+Constant V_ViewWindow : integer := 480;
+Constant V_SyncCount : integer := 2;
+Constant V_BackPorch : integer := 33;
+Constant V_TotalCount : integer := 525;
+-- *************************************** --
+
+signal H_Count : integer range 0 to 10000 := 0;
+signal V_Count : integer range 0 to 10000 := 0;
+
+signal H_Color_Enable : STD_LOGIC := '0';
+signal V_Color_Enable : STD_LOGIC := '0';
+
+signal Color_Enable : STD_LOGIC := '0';
+
 begin
 
+process(I_Clk)
+begin
+    if rising_edge(I_Clk) then
+    
+    -- INCREMENT HORIZONTAL COUNTER
+    H_Count <= H_Count + 1;
+        
+        if H_Count <= (H_ViewWindow - 1) then            
+            O_Hsync <= '1';
+            H_Color_Enable <= '1';
+            if V_Count <= (V_ViewWindow - 1) then
+                O_Vsync <= '1';
+                V_Color_Enable <= '1';
+            elsif V_Count <= (V_FrontPorch + V_ViewWindow - 1) then
+                O_Vsync <= '1';
+                V_Color_Enable <= '0';
+            elsif V_Count <= (V_TotalCount - V_BackPorch - 1) then
+                O_Vsync <= '0';
+                V_Color_Enable <= '0';
+            elsif V_Count <= (V_TotalCount - 1) then
+                O_Vsync <= '1';
+                V_Color_Enable <= '0';
+            else
+                V_Count <= 0;
+            end if;
+        elsif H_Count <= (H_FrontPorch + H_ViewWindow - 1) then
+            O_Hsync <= '1';
+            H_Color_Enable <= '0';
+            if V_Count <= (V_ViewWindow - 1) then
+                O_Vsync <= '1';
+                V_Color_Enable <= '1';
+            elsif V_Count <= (V_FrontPorch + V_ViewWindow - 1) then
+                O_Vsync <= '1';
+                V_Color_Enable <= '0';
+            elsif V_Count <= (V_TotalCount - V_BackPorch - 1) then
+                O_Vsync <= '0';
+                V_Color_Enable <= '0';
+            elsif V_Count <= (V_TotalCount - 1) then
+                O_Vsync <= '1';
+                V_Color_Enable <= '0';
+            else
+                V_Count <= 0;
+            end if;
+        elsif H_Count <= (H_TotalCount - H_BackPorch - 1) then
+            O_Hsync <= '0';
+            H_Color_Enable <= '0';
+            if V_Count <= (V_ViewWindow - 1) then
+                O_Vsync <= '1';
+                V_Color_Enable <= '1';
+            elsif V_Count <= (V_FrontPorch + V_ViewWindow - 1) then
+                O_Vsync <= '1';
+                V_Color_Enable <= '0';
+            elsif V_Count <= (V_TotalCount - V_BackPorch - 1) then
+                O_Vsync <= '0';
+                V_Color_Enable <= '0';
+            elsif V_Count <= (V_TotalCount - 1) then
+                O_Vsync <= '1';
+                V_Color_Enable <= '0';
+            else
+                V_Count <= 0;
+            end if;
+        elsif H_Count <= (H_TotalCount - 1) then
+            O_Hsync <= '1';
+            H_Color_Enable <= '0';
+            if V_Count <= (V_ViewWindow - 1) then
+                O_Vsync <= '1';
+                V_Color_Enable <= '1';
+            elsif V_Count <= (V_FrontPorch + V_ViewWindow - 1) then
+                O_Vsync <= '1';
+                V_Color_Enable <= '0';
+            elsif V_Count <= (V_TotalCount - V_BackPorch - 1) then
+                O_Vsync <= '0';
+                V_Color_Enable <= '0';
+            elsif V_Count <= (V_TotalCount - 1) then
+                O_Vsync <= '1';
+                V_Color_Enable <= '0';
+            else
+                V_Count <= 0;
+            end if;
+        else
+            H_Count <= 0;
+            V_Count <= V_Count + 1;
+        end if;
+    end if;
+end process;
+
+
+process(H_Color_Enable, V_Color_Enable)
+begin
+
+Color_Enable <= H_Color_Enable AND V_Color_Enable;
+
+if Color_Enable = '1' then
+    O_Red <= I_Red;
+    O_Green <= I_Green;
+    O_Blue <= I_Blue;
+else
+    O_Red <= (others => '0');
+    O_Green <= (others => '0');
+    O_Blue <= (others => '0');
+end if;
+
+end process;
 
 end Behavioral;
