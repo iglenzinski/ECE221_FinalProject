@@ -33,6 +33,10 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity Top_Design is
     Port ( I_Clk : in STD_LOGIC;
+           I_Left : in STD_LOGIC;
+           I_Right : in STD_LOGIC;
+           I_Up : in STD_LOGIC;
+           I_Down : in STD_LOGIC;
            I_Red : in STD_LOGIC_VECTOR (3 downto 0);
            I_Green : in STD_LOGIC_VECTOR (3 downto 0);
            I_Blue : in STD_LOGIC_VECTOR (3 downto 0);
@@ -50,7 +54,7 @@ component Clock_Divider is
     Port ( I_Clk : in STD_LOGIC;
            O_Clk : out STD_LOGIC);
 end component;
-           
+
 component VGA_Controller is
     Port ( I_Clk : in STD_LOGIC;
            I_Red : in STD_LOGIC_VECTOR (3 downto 0);
@@ -60,17 +64,25 @@ component VGA_Controller is
            O_Green : out STD_LOGIC_VECTOR (3 downto 0);
            O_Blue : out STD_LOGIC_VECTOR (3 downto 0);
            O_Hsync : out STD_LOGIC;
-           O_Vsync : out STD_LOGIC);
+           O_Vsync : out STD_LOGIC;
+           O_HCount : out INTEGER;
+           O_VCount : out INTEGER);
 end component;
 
 signal Clock_Signal : STD_LOGIC := '0';
+
+signal H_Count : INTEGER := 0;
+signal V_Count : INTEGER := 0;
+--signal Red_Color : STD_LOGIC_VECTOR (3 downto 0);
+--signal Green_Color : STD_LOGIC_VECTOR (3 downto 0);
+--signal Blue_Color : STD_LOGIC_VECTOR (3 downto 0);
 
 begin
 
 Inst_Clock_Divider: Clock_Divider
     Port Map( I_Clk => I_Clk,
               O_Clk => Clock_Signal);
-              
+
 Inst_VGA_Controller: VGA_Controller
     Port Map( I_Clk => Clock_Signal,
               I_Red => I_Red,
@@ -80,7 +92,9 @@ Inst_VGA_Controller: VGA_Controller
               O_Green => O_Green,
               O_Blue => O_Blue,
               O_Hsync => O_Hsync,
-              O_Vsync => O_Vsync);
+              O_Vsync => O_Vsync,
+              O_HCount => H_Count,
+              O_VCount => V_Count);
               
 O_CLK <= Clock_Signal;
     
